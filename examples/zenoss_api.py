@@ -6,6 +6,8 @@
 # >>> events = z.get_events()
 # etc.
 
+# FIXED severity string -> integer
+
 import json
 import urllib
 import urllib2
@@ -25,6 +27,15 @@ ROUTERS = { 'MessagingRouter': 'messaging',
             'ReportRouter': 'report',
             'MibRouter': 'mib',
             'ZenPackRouter': 'zenpack' }
+            
+SEVERITY = {
+    'Critical': 5,
+    'Error':    4,
+    'Warning':  3,
+    'Info':     2,
+    'Debug':    1,
+    'Clear':    0
+}
 
 class ZenossAPI():
     def __init__(self, debug=False):
@@ -92,7 +103,14 @@ class ZenossAPI():
     def create_event_on_device(self, device, severity, summary):
         if severity not in ('Critical', 'Error', 'Warning', 'Info', 'Debug', 'Clear'):
             raise Exception('Severity "' + severity +'" is not valid.')
-
-        data = dict(device=device, summary=summary, severity=severity,
-                    component='', evclasskey='', evclass='')
+        
+        data = {
+            'device': device,
+            'summary': summary,
+            'severity': SEVERITY[severity],
+            'component': '',
+            'evclasskey': '',
+            'evclass': '/',
+        }
+        
         return self._router_request('EventsRouter', 'add_event', [data])
